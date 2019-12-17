@@ -5,8 +5,8 @@ import store, {
   createNode,
   getNodes,
   getSubjects,
-  getTrees,
-  createTree
+  createTree,
+  getTrees
 } from "../../store/";
 import socketIOClient from "socket.io-client";
 import socket from "../socket";
