@@ -16,13 +16,36 @@ class Subjects extends Component {
   }
 
   async componentDidMount() {
-    const subjects = (await axios.get(`/api/welcome/${this.props.match.params.id}`)).data
-    this.setState({subjects})
+    await store.dispatch(getSubjects());
+    await store.dispatch(getTrees());
+    const subjects = (
+      await axios.get(`/api/welcome/${this.props.match.params.id}`)
+    ).data;
+    this.setState({ subjects });
   }
 
   async create(e) {
     e.preventDefault();
     await this.props.postSubject(this.state);
+    console.log("this.props.subjects", this.props.subjects);
+    const subject = this.props.subjects[this.props.subjects.length - 1];
+    // console.log("match.id", this.props.match.params.id);
+    const tree = this.props.trees.filter(tree => tree.subjectId === subject.id);
+
+    console.log("subjectChat");
+
+    if (!tree.length) {
+      console.log("tree.length", tree.length);
+      await this.props.postTree({
+        idea: subject.name,
+        subjectId: subject.id
+      });
+      console.log("treeChat", tree);
+    }
+    console.log(
+      "query Selector",
+      document.querySelector('input[name="name"]').innerHTML
+    );
   }
 
   render() {
@@ -45,7 +68,7 @@ class Subjects extends Component {
         <br />
         <div className="container">
           <ul className="list-group">
-            {this.state.subjects.map(subject => (
+            {this.props.subjects.map(subject => (
               <Link key={subject.id} to={`/subjects/${subject.id}`}>
                 <li key={subject.id} className="list-group-item">
                   {subject.name}
@@ -60,12 +83,15 @@ class Subjects extends Component {
 }
 
 const mapStateToProps = state => ({
-  subjects: state.subjects
+  subjects: state.subjects,
+  trees: state.trees
 });
 const mapDispatchToProps = dispatch => {
   return {
     postSubject: _subject => dispatch(createSubject(_subject)),
-    getSubjects: () => dispatch(getSubjects())
+    getSubjects: () => dispatch(getSubjects()),
+    getTrees: () => dispatch(getTrees()),
+    postTree: _tree => dispatch(createTree(_tree))
   };
 };
 export default connect(mapStateToProps, mapDispatchToProps)(Subjects);
