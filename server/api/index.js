@@ -3,6 +3,18 @@ const passport = require("passport");
 const express = require("express");
 const db = require("../db/db");
 const { Subject, User, Node, Tree } = require("../db/models/index");
+const { conn } = db;
+const session = require("express-session");
+const SequelizeStore = require("connect-session-sequelize")(session.Store);
+const thestore = new SequelizeStore({ db: conn });
+router.use(
+  session({
+    secret: "mindmap1",
+    store: thestore,
+    resave: false,
+    proxy: true
+  })
+);
 
 router.use(express.json());
 router.use(passport.initialize());
@@ -20,10 +32,14 @@ passport.deserializeUser(async (id, done) => {
 });
 
 router.get("/users", (req, res, next) => {
+  console.log("USESR ", req.body);
   User.findAll({ attributes: ["id", "email", "name"] })
     .then(user => res.send(user))
     .catch(next);
 });
+
+///sync sessions to store
+thestore.sync();
 
 router.post("/login", (req, res, next) => {
   User.findOne({ where: { email: req.body.email } })
@@ -36,6 +52,19 @@ router.post("/login", (req, res, next) => {
         req.login(user, err => (err ? next(err) : res.json(user)));
       }
     })
+    .catch(next);
+});
+router.get("/login", (req, res, next) => {
+  const user = req.session.passport;
+  if (user) {
+    return res.send(user);
+  }
+  next({ status: 401 });
+});
+
+router.get("/welcome/:id", (req, res, next) => {
+  Subject.findAll({ where: { userId: req.params.id } })
+    .then(subjects => res.send(subjects))
     .catch(next);
 });
 
@@ -51,7 +80,7 @@ router.post("/register", (req, res, next) => {
     })
     .catch(err => {
       if (err.name === "SequelizeUniqueConstraintError") {
-        res.status(401).send("User already xists");
+        res.status(401).send("User already exists");
       } else {
         next(err);
       }
@@ -75,7 +104,7 @@ router.post("/nodes", (req, res, next) => {
     .catch(next);
 });
 router.get("/subjects", (req, res, next) => {
-  Subject.findAll()
+  Subject.findAll({ where: { userId: req.session.passport.user } })
     .then(subjects => res.send(subjects))
     .catch(next);
 });

@@ -8,9 +8,12 @@ import Subjects from "./Subjects";
 
 class Routes extends Component {
   render() {
+    console.log("LOGIN", this);
+    console.log("LOGIN ROUTEs ", this.props);
     return (
       <Switch>
         <Route exact path="/" component={Home} />
+        <Route exact path="/welcome/:id" component={Subjects} />
         <Route exact path="/login" component={Login} />
         <Route exact path="/subjects" component={Subjects} />
         <Route exact path="/subjects/:id" component={Chat} />
