@@ -28,12 +28,18 @@ class Chat extends Component {
     store.dispatch(getSubjects());
     store.dispatch(getTrees());
     await this.props.getMessages();
+    await this.props.getTrees();
 
     socket.on(this.state.room, msg => {
       if (msg) {
         this.props.getMessages();
       }
     });
+  }
+  async componentDidUpdate() {
+    console.log("UPDATED");
+    this.renderTree;
+    // store.dispatch(getTrees());
   }
 
   handleChange(ev) {
@@ -50,17 +56,24 @@ class Chat extends Component {
     };
     await this.props.postNode(node);
     //sends the body to the socket event emitter
-    console.log("SUBMIT ", this.state.body);
     socket.emit(this.state.room, { body: this.state.body });
 
     this.setState({ room: "APP", body: "", subjectId: "" });
   };
 
-  renderTree() {
+  ideaSelected = ev => {
+    if (!ev.target.style.border) {
+      ev.target.style.border = "2px solid white";
+    } else {
+      ev.target.style.border = "";
+    }
+  };
+
+  renderTree = ev => {
+    console.log("RENDER TREE", ev);
     if (this.props.trees.length == 0) {
       return "No data yet";
     } else {
-      console.log("nodesTree", this.props.trees);
       return (
         <TreeWrapper
           trees={this.props.trees}
@@ -68,16 +81,18 @@ class Chat extends Component {
         />
       );
     }
-  }
+  };
 
   render() {
     let ideaObj = {};
+
     const { postTree } = this.props;
     setTimeout(() => {
       const chatIdea = document.querySelector(".messages");
       ideaObj.subjectId = this.props.match.params.id;
       chatIdea.addEventListener("click", e => {
         if (e.target.tagName === "LI") {
+          console.log("CLICKED ON CHAT LIST");
           const ideaChat = e.target.innerHTML;
           ideaObj.idea = ideaChat;
         }
@@ -87,8 +102,6 @@ class Chat extends Component {
 
         ideaObj.parentId = d.data.id;
         postTree(ideaObj);
-
-        console.log(ideaObj);
       });
     }, 0);
 
@@ -97,15 +110,19 @@ class Chat extends Component {
         <div className="row">
           <div className="col">
             <div className={"chat"}>
-              <h2>
+              <h3>
                 {this.props.subjects.map(subject =>
                   subject.id === this.props.match.params.id ? subject.name : ""
                 )}
-              </h2>
+              </h3>
               <ul className={"messages"}>
                 {this.props.nodes.map(node =>
                   this.props.match.params.id === node.subjectId ? (
-                    <li className={"chatBubble"} key={node.id}>
+                    <li
+                      className={"chatBubble"}
+                      key={node.id}
+                      onClick={this.ideaSelected}
+                    >
                       {node.body}
                     </li>
                   ) : (
@@ -113,8 +130,6 @@ class Chat extends Component {
                   )
                 )}
               </ul>
-              <br />
-              <br />
               <form method="post" onSubmit={this.handleSubmit}>
                 <div className="form-group">
                   <input
@@ -126,7 +141,7 @@ class Chat extends Component {
                     onChange={this.handleChange}
                   />
                 </div>
-                <div>
+                <div id='send'>
                   <button type="submit" className="btn-primary" id="chat-send">
                     Send
                   </button>
@@ -135,7 +150,9 @@ class Chat extends Component {
               <br />
             </div>
           </div>
-          <div className="col">{this.renderTree()}</div>
+          <div className="col" onClick={this.renderTree}>
+            {this.renderTree()}
+          </div>
         </div>
       </div>
     );

@@ -1,7 +1,8 @@
 import React, { Component } from "react";
-import MindMap from "./MindMap";
+import MindMap from "./Mindmap";
+import { connect } from "react-redux";
 
-export default class TreeWrapper extends Component {
+class TreeWrapper extends Component {
   async componentDidMount() {
     const trees = await this.props.trees.filter(
       tree => tree.subjectId === this.props.match
@@ -9,6 +10,16 @@ export default class TreeWrapper extends Component {
     new MindMap(this.refs.mindmap, trees);
   }
   render() {
-    return <div ref="mindmap"></div>;
+    return <div className={"mindmap"} ref="mindmap"></div>;
   }
 }
+
+const mapStateToProps = state => ({
+  trees: state.trees
+});
+const mapDispatchToProps = dispatch => {
+  return {
+    getTrees: () => dispatch(getTrees())
+  };
+};
+export default connect(mapStateToProps, mapDispatchToProps)(TreeWrapper);

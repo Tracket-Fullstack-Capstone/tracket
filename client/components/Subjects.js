@@ -21,9 +21,10 @@ class Subjects extends Component {
   }
 
   async componentDidMount() {
-    const subjects = (
-      await axios.get(`/api/welcome/${this.props.match.params.id}`)
-    ).data;
+    const subjects = await store.dispatch(getSubjects());
+    // const subjects = (
+    //   await axios.get(`/api/welcome/${this.props.match.params.id}`)
+    // ).data;
     this.setState({ subjects });
   }
 
@@ -45,7 +46,9 @@ class Subjects extends Component {
   render() {
     const { name } = this.state;
     return (
+
       <div className="container">
+      <h2>Create New Project</h2>
         <form onSubmit={e => this.create(e)}>
           <input
             name="name"
@@ -62,7 +65,7 @@ class Subjects extends Component {
         <br />
         <div className="container">
           <ul className="list-group">
-            {this.state.subjects.map(subject => (
+            {this.props.subjects.map(subject => (
               <Link key={subject.id} to={`/subjects/${subject.id}`}>
                 <li key={subject.id} className="list-group-item">
                   {subject.name}

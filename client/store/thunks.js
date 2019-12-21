@@ -8,6 +8,7 @@ import {
   _setNodes,
   setLoginError,
   setLoginSuccess,
+  setLogoutSuccess,
   setTreeAction,
   createTreeAction,
   SET_AUTH
@@ -64,6 +65,7 @@ const getTrees = () => {
 };
 
 const createTree = payload => {
+  console.log("PAYLOAD ", payload);
   return async dispatch => {
     const newTree = await axios.post("/api/trees", payload);
     dispatch(createTreeAction(newTree.data));
@@ -89,6 +91,16 @@ const onLogin = user => {
   };
 };
 
+const onLogout = (user) => {
+  return async dispatch => {
+    await axios
+      .post("/api/logout", user)
+      .then(response => {
+        dispatch(setLogoutSuccess(response.data));
+      })
+  };
+};
+
 const attemptSessionLogin = () => {
   return async dispatch => {
     const auth = (await axios.get("/api/login")).data;
@@ -101,6 +113,7 @@ export {
   createUser,
   updateUser,
   onLogin,
+  onLogout,
   createNode,
   createSubject,
   getSubjects,
