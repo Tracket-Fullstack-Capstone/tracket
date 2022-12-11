@@ -50,7 +50,7 @@
     "babel-loader": "^8.0.6",
     "connect-session-sequelize": "^6.0.0",
     "d3": "^5.14.2",
-    "express": "^4.17.1",
+    "express": "^4.17.3",
     "express-session": "^1.17.0",
     "passport": "^0.4.1",
     "pg": "^7.14.0",
